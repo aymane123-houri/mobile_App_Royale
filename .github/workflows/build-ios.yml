@@ -1,14 +1,10 @@
 name: Build iOS IPA
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:   # Permet de lancer manuellement
+  workflow_dispatch:
 
 jobs:
-  build-ios:
+  build:
     runs-on: macos-latest
 
     steps:
@@ -18,24 +14,27 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'     # Change si tu utilises une autre version
+          flutter-version: '3.24.0'
           channel: 'stable'
-          cache: true
 
-      - name: Get Flutter dependencies
+      - name: Get dependencies
         run: flutter pub get
 
-      - name: Setup CocoaPods
+      - name: Install CocoaPods
         run: |
           cd ios
           pod install --repo-update
 
-      - name: Build IPA
-        run: flutter build ipa --release --no-codesign
+      - name: Build IPA (No Code Sign)
+        run: |
+          flutter build ipa \
+            --release \
+            --no-codesign \
+            --export-options-plist=./ExportOptions.plist
 
-      - name: Upload IPA Artifact
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: Royale-Moments-IPA
           path: build/ios/ipa/*.ipa
-          retention-days: 30
+          retention-days: 7

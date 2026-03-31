@@ -5,12 +5,10 @@
     <key>method</key>
     <string>ad-hoc</string>
     <key>teamID</key>
-    <string></string>   <!-- Laisser vide pour l'instant -->
+    <string></string>
     <key>signingStyle</key>
     <string>automatic</string>
     <key>destination</key>
     <string>export</string>
-    <key>stripSwiftSymbols</key>
-    <true/>
 </dict>
 </plist>

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-ios:
     runs-on: macos-latest
 
     steps:
@@ -25,16 +25,17 @@ jobs:
           cd ios
           pod install --repo-update
 
-      - name: Build IPA (No Code Sign)
+      - name: Set Development Team (Important)
         run: |
-          flutter build ipa \
-            --release \
-            --no-codesign \
-            --export-options-plist=./ExportOptions.plist
+          sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = "YOUR_TEAM_ID_HERE";/' ios/Runner.xcodeproj/project.pbxproj
+          echo "✅ Development Team configuré"
+
+      - name: Build IPA
+        run: flutter build ipa --release --no-codesign --export-options-plist=ExportOptions.plist
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: Royale-Moments-IPA
           path: build/ios/ipa/*.ipa
-          retention-days: 7
+          retention-days: 14

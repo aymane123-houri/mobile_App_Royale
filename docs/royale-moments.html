@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royale Moments — Perfect Moments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Cinzel:wght@400;500;600&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================
+   VARIABLES & RESET
+========================================= */
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8D48B;
+  --gold-pale: #F5E6B8;
+  --rose-gold: #C17C5A;
+  --champagne: #D4AF7A;
+  --noir: #080808;
+  --noir-2: #0E0D0C;
+  --noir-3: #161412;
+  --noir-card: #111010;
+  --white-soft: #F9F4EC;
+  --white-dim: rgba(249,244,236,0.08);
+  --border-gold: rgba(201,168,76,0.25);
+  --border-glow: rgba(201,168,76,0.5);
+  --text-muted: rgba(249,244,236,0.45);
+  --text-body: rgba(249,244,236,0.78);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  background: var(--noir);
+  color: var(--white-soft);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* =========================================
+   CUSTOM CURSOR
+========================================= */
+#cursor-dot {
+  width: 6px; height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s;
+}
+#cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(201,168,76,0.5);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: all 0.18s ease;
+}
+body:hover #cursor-ring { opacity: 1; }
+
+/* =========================================
+   CANVAS PARTICLES
+========================================= */
+#particles-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+  opacity: 0.55;
+}
+
+/* =========================================
+   LOADING SCREEN
+========================================= */
+#loader {
+  position: fixed; inset: 0;
+  background: var(--noir);
+  z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  gap: 28px;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#loader.hidden { opacity: 0; visibility: hidden; }
+.loader-crown {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.45em;
+  color: var(--gold);
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fadeUp 0.9s ease 0.3s forwards;
+}
+.loader-bar-wrap {
+  width: 200px; height: 1px;
+  background: rgba(201,168,76,0.15);
+  position: relative; overflow: hidden;
+}
+.loader-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--gold), var(--champagne));
+  animation: loadBar 1.8s ease forwards;
+}
+@keyframes loadBar { to { width: 100%; } }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   NAV
+========================================= */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 22px 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background 0.4s, padding 0.4s;
+}
+nav.scrolled {
+  background: rgba(8,8,8,0.92);
+  backdrop-filter: blur(18px);
+  padding: 14px 60px;
+  border-bottom: 1px solid var(--border-gold);
+}
+.nav-logo {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.nav-logo span { color: var(--white-soft); }
+.nav-links { display: flex; gap: 40px; list-style: none; }
+.nav-links a {
+  font-size: 0.68rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-body);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.nav-links a:hover { color: var(--gold); }
+.nav-cta {
+  padding: 9px 26px;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.35s;
+  font-family: 'Montserrat', sans-serif;
+}
+.nav-cta:hover {
+  background: var(--gold);
+  color: var(--noir);
+}
+
+/* =========================================
+   HERO
+========================================= */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  z-index: 1;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 80%, rgba(201,168,76,0.07) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(193,124,90,0.06) 0%, transparent 60%),
+    linear-gradient(180deg, #080808 0%, #0d0b09 50%, #080808 100%);
+  z-index: 0;
+}
+.hero-grid-lines {
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
+}
+.hero-content {
+  position: relative; z-index: 2;
+  text-align: center;
+  padding: 0 20px;
+  max-width: 960px;
+}
+.hero-badge {
+  display: inline-block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.55em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--border-gold);
+  padding: 7px 22px;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeUp 1s ease 2.2s forwards;
+}
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3.4rem, 8vw, 7.5rem);
+  font-weight: 300;
+  line-height: 1.0;
+  letter-spacing: 0.01em;
+  margin-bottom: 12px;
+  opacity: 0;
+  animation: fadeUp 1.1s ease 2.4s forwards;
+}
+.hero-title em {
+  font-style: italic;
+  background: linear-gradient(135deg, var(--gold-pale), var(--gold), var(--champagne));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-subtitle {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.7rem, 1.5vw, 0.95rem);
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 36px;
+  opacity: 0;
+  animation: fadeUp 1.1s ease 2.6s forwards;
+}
+.hero-desc {
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--text-body);
+  max-width: 560px;
+  margin: 0 auto 52px;
+  font-weight: 300;
+  opacity: 0;
+  animation: fadeUp 1.1s ease 2.8s forwards;
+}
+.hero-actions {
+  display: flex; align-items: center; justify-content: center;
+  gap: 20px; flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 1.1s ease 3s forwards;
+}
+.btn-royal {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 16px 40px;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--champagne) 50%, var(--gold) 100%);
+  background-size: 200% 200%;
+  color: var(--noir);
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.4s;
+  position: relative; overflow: hidden;
+}
+.btn-royal::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.15);
+  transform: translateX(-100%);
+  transition: transform 0.4s ease;
+}
+.btn-royal:hover::after { transform: translateX(100%); }
+.btn-royal:hover { background-position: right center; transform: translateY(-2px); box-shadow: 0 12px 40px rgba(201,168,76,0.35); }
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 15px 38px;
+  border: 1px solid var(--border-glow);
+  color: var(--gold);
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.35s;
+}
+.btn-ghost:hover { background: rgba(201,168,76,0.08); transform: translateY(-2px); }
+.hero-scroll {
+  position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+  z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  opacity: 0;
+  animation: fadeUp 1s ease 3.5s forwards;
+}
+.hero-scroll span {
+  font-size: 0.58rem; letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.scroll-line {
+  width: 1px; height: 55px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.4; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.1); }
+}
+
+/* Floating orbs */
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.12;
+  z-index: 0;
+  animation: orbFloat 8s ease-in-out infinite alternate;
+}
+.orb-1 { width: 500px; height: 500px; background: var(--gold); top: -150px; right: -100px; }
+.orb-2 { width: 350px; height: 350px; background: var(--rose-gold); bottom: -100px; left: -80px; animation-delay: -3s; }
+.orb-3 { width: 250px; height: 250px; background: var(--champagne); top: 50%; left: 60%; animation-delay: -5s; }
+@keyframes orbFloat {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(30px, -30px) scale(1.05); }
+}
+
+/* Phone mockup */
+.hero-phone {
+  display: none;
+}
+
+/* =========================================
+   SECTION SHARED
+========================================= */
+section { position: relative; z-index: 1; }
+.section-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.55em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  display: block;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 300;
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+.section-title em {
+  font-style: italic;
+  color: var(--gold);
+}
+.gold-divider {
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 24px auto;
+}
+
+/* =========================================
+   APP PRESENTATION
+========================================= */
+#presentation {
+  padding: 130px 60px;
+  background: var(--noir-2);
+}
+.presentation-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 100px; align-items: center;
+}
+.presentation-text .section-title { text-align: left; }
+.presentation-text .gold-divider { margin: 24px 0; }
+.presentation-text p {
+  color: var(--text-body);
+  font-size: 0.93rem;
+  line-height: 1.95;
+  margin-bottom: 20px;
+}
+.feature-list { list-style: none; margin-top: 36px; display: flex; flex-direction: column; gap: 18px; }
+.feature-list li {
+  display: flex; align-items: flex-start; gap: 16px;
+  color: var(--text-body); font-size: 0.88rem; line-height: 1.7;
+}
+.feature-icon {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border: 1px solid var(--border-gold);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 0.85rem;
+  margin-top: 2px;
+}
+.phone-showcase {
+  display: flex; justify-content: center; align-items: center;
+  position: relative;
+}
+.phone-frame {
+  width: 260px; height: 530px;
+  border-radius: 38px;
+  border: 1.5px solid rgba(201,168,76,0.3);
+  background: linear-gradient(160deg, #1a1410, #0d0b09);
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(201,168,76,0.08),
+    0 40px 120px rgba(0,0,0,0.8),
+    0 0 80px rgba(201,168,76,0.08) inset;
+  overflow: hidden;
+  animation: phoneLevitate 4s ease-in-out infinite alternate;
+}
+@keyframes phoneLevitate {
+  from { transform: translateY(0) rotate(-1deg); }
+  to   { transform: translateY(-18px) rotate(1deg); }
+}
+.phone-screen-content {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; padding: 30px 20px;
+}
+.phone-app-icon {
+  width: 68px; height: 68px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--noir-3), #1c1712);
+  border: 1px solid var(--border-glow);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  box-shadow: 0 8px 30px rgba(201,168,76,0.2);
+}
+.phone-app-name {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  text-align: center;
+}
+.phone-tag {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+.phone-preview-cards {
+  display: flex; flex-direction: column; gap: 8px;
+  width: 100%; margin-top: 10px;
+}
+.phone-card {
+  background: rgba(201,168,76,0.07);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.phone-card-emoji { font-size: 1.1rem; }
+.phone-card-text { font-size: 0.55rem; color: var(--text-body); line-height: 1.4; }
+.phone-card-text strong { display: block; color: var(--gold-pale); font-weight: 500; letter-spacing: 0.05em; }
+.phone-glow {
+  position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 100px;
+  background: var(--gold);
+  filter: blur(60px); opacity: 0.1;
+  border-radius: 50%;
+}
+.phone-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(201,168,76,0.12);
+  animation: ringExpand 3s ease-in-out infinite;
+}
+.ring-1 { width: 340px; height: 340px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.ring-2 { width: 440px; height: 440px; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: 1s; }
+.ring-3 { width: 540px; height: 540px; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: 2s; }
+@keyframes ringExpand {
+  0% { opacity: 0.15; transform: translate(-50%, -50%) scale(0.95); }
+  50% { opacity: 0.08; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.05); }
+}
+
+/* =========================================
+   OCCASIONS
+========================================= */
+#occasions {
+  padding: 130px 60px;
+  background: var(--noir);
+}
+.occasions-header {
+  text-align: center; margin-bottom: 80px;
+}
+.occasions-grid {
+  max-width: 1200px; margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+}
+.occasion-card {
+  position: relative;
+  aspect-ratio: 1 / 1.2;
+  background: var(--noir-card);
+  overflow: hidden;
+  cursor: none;
+  border: 1px solid rgba(201,168,76,0.06);
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.occasion-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, rgba(201,168,76,0.03), transparent 60%);
+  z-index: 0;
+}
+.occasion-card:hover {
+  border-color: rgba(201,168,76,0.3);
+  transform: translateY(-4px);
+  z-index: 2;
+}
+.occasion-inner {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; padding: 28px 20px;
+  transition: all 0.4s;
+}
+.occasion-emoji {
+  font-size: 2.4rem;
+  filter: grayscale(0.2);
+  transition: transform 0.4s;
+}
+.occasion-card:hover .occasion-emoji { transform: scale(1.2); }
+.occasion-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--white-soft);
+  text-align: center;
+}
+.occasion-name-fr {
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-family: 'Montserrat', sans-serif;
+}
+.occasion-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
+  max-width: 150px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s;
+}
+.occasion-card:hover .occasion-desc { opacity: 1; transform: translateY(0); }
+.occasion-glow {
+  position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
+  width: 80px; height: 60px;
+  background: var(--gold);
+  filter: blur(30px); opacity: 0;
+  transition: opacity 0.4s;
+}
+.occasion-card:hover .occasion-glow { opacity: 0.08; }
+
+/* =========================================
+   WHY ROYALE
+========================================= */
+#why {
+  padding: 130px 60px;
+  background: var(--noir-2);
+}
+.why-inner {
+  max-width: 1200px; margin: 0 auto;
+}
+.why-header { text-align: center; margin-bottom: 80px; }
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+.why-card {
+  padding: 52px 44px;
+  background: var(--noir-card);
+  border: 1px solid rgba(201,168,76,0.07);
+  position: relative; overflow: hidden;
+  transition: all 0.45s;
+}
+.why-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.why-card:hover { border-color: rgba(201,168,76,0.22); transform: translateY(-6px); }
+.why-card:hover::after { opacity: 1; }
+.why-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 4rem; font-weight: 300;
+  color: rgba(201,168,76,0.12);
+  line-height: 1; margin-bottom: 20px;
+  position: absolute; top: 20px; right: 28px;
+}
+.why-icon {
+  font-size: 1.6rem; margin-bottom: 22px;
+  display: block;
+}
+.why-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.45rem; font-weight: 500;
+  color: var(--white-soft);
+  margin-bottom: 14px;
+  letter-spacing: 0.04em;
+}
+.why-desc {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.85;
+}
+
+/* =========================================
+   TESTIMONIALS
+========================================= */
+#testimonials {
+  padding: 130px 60px;
+  background: var(--noir);
+  overflow: hidden;
+}
+.testimonials-header { text-align: center; margin-bottom: 80px; }
+.testimonials-track {
+  display: flex; gap: 28px;
+  animation: slideTrack 30s linear infinite;
+  width: max-content;
+}
+.testimonials-track:hover { animation-play-state: paused; }
+.testimonials-wrapper { overflow: hidden; }
+@keyframes slideTrack {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.testimonial-card {
+  width: 380px; flex-shrink: 0;
+  padding: 44px 40px;
+  background: var(--noir-card);
+  border: 1px solid rgba(201,168,76,0.1);
+  position: relative;
+}
+.testimonial-card::before {
+  content: '"';
+  position: absolute; top: 20px; left: 32px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 5rem; line-height: 1;
+  color: rgba(201,168,76,0.1);
+}
+.testimonial-stars {
+  color: var(--gold); font-size: 0.75rem;
+  letter-spacing: 4px; margin-bottom: 20px;
+}
+.testimonial-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic;
+  font-weight: 300;
+  color: var(--white-soft);
+  line-height: 1.8;
+  margin-bottom: 28px;
+}
+.testimonial-author {
+  display: flex; align-items: center; gap: 14px;
+}
+.author-avatar {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--rose-gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  border: 1px solid rgba(201,168,76,0.3);
+}
+.author-info { display: flex; flex-direction: column; gap: 2px; }
+.author-name {
+  font-size: 0.78rem; font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--white-soft);
+}
+.author-role {
+  font-size: 0.62rem;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+}
+.testimonial-occasion {
+  position: absolute; top: 24px; right: 28px;
+  font-size: 0.6rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--gold);
+  border: 1px solid var(--border-gold);
+  padding: 4px 10px;
+}
+
+/* =========================================
+   STATS
+========================================= */
+#stats {
+  padding: 100px 60px;
+  background: linear-gradient(180deg, var(--noir-2), var(--noir-3));
+  border-top: 1px solid var(--border-gold);
+  border-bottom: 1px solid var(--border-gold);
+}
+.stats-inner {
+  max-width: 1000px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border-gold);
+}
+.stat-item {
+  padding: 40px 20px; text-align: center;
+  background: var(--noir-3);
+}
+.stat-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  font-weight: 300;
+  background: linear-gradient(135deg, var(--gold-pale), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.stat-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* =========================================
+   DOWNLOAD CTA
+========================================= */
+#download {
+  padding: 160px 60px;
+  background: var(--noir);
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.download-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(201,168,76,0.06), transparent);
+}
+.download-inner { position: relative; z-index: 1; max-width: 750px; margin: 0 auto; }
+.download-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.04));
+  border: 1px solid var(--border-gold);
+  padding: 8px 28px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.55em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 44px;
+}
+.download-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.6rem, 6vw, 4.8rem);
+  font-weight: 300;
+  line-height: 1.1;
+  margin-bottom: 22px;
+}
+.download-title em { font-style: italic; color: var(--gold); }
+.download-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 56px;
+}
+.download-btn {
+  display: inline-flex; align-items: center; gap: 14px;
+  padding: 20px 52px;
+  background: linear-gradient(135deg, var(--gold), var(--champagne), var(--gold));
+  background-size: 200% 200%;
+  color: var(--noir);
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.45s;
+  position: relative; overflow: hidden;
+  box-shadow: 0 0 60px rgba(201,168,76,0.2);
+}
+.download-btn:hover {
+  background-position: right center;
+  transform: translateY(-3px);
+  box-shadow: 0 20px 60px rgba(201,168,76,0.4);
+}
+.download-btn svg { width: 20px; height: 20px; }
+.download-note {
+  margin-top: 22px;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+}
+.download-security {
+  display: flex; align-items: center; justify-content: center; gap: 28px;
+  margin-top: 60px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border-gold);
+}
+.security-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.65rem; letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.security-item span { color: var(--gold); }
+
+/* =========================================
+   FOOTER
+========================================= */
+footer {
+  padding: 60px;
+  background: var(--noir-3);
+  border-top: 1px solid var(--border-gold);
+  text-align: center;
+}
+.footer-logo {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.35em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.footer-tagline {
+  font-size: 0.62rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 36px;
+}
+.footer-links {
+  display: flex; justify-content: center; gap: 36px;
+  list-style: none; margin-bottom: 36px;
+}
+.footer-links a {
+  font-size: 0.62rem; letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.footer-links a:hover { color: var(--gold); }
+.footer-copy {
+  font-size: 0.6rem;
+  color: rgba(249,244,236,0.25);
+  letter-spacing: 0.1em;
+}
+
+/* =========================================
+   SCROLL ANIMATIONS
+========================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+.reveal-delay-6 { transition-delay: 0.6s; }
+
+/* =========================================
+   GLASSMORPHISM ACCENT
+========================================= */
+.glass-accent {
+  background: rgba(201,168,76,0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(201,168,76,0.1);
+}
+
+/* =========================================
+   MOBILE NAV TOGGLE
+========================================= */
+.nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+.nav-toggle span { display: block; width: 24px; height: 1px; background: var(--gold); }
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 1100px) {
+  .occasions-grid { grid-template-columns: repeat(4, 1fr); }
+  .why-grid { grid-template-columns: repeat(2, 1fr); }
+  .presentation-inner { gap: 60px; }
+}
+@media (max-width: 900px) {
+  nav { padding: 18px 28px; }
+  nav.scrolled { padding: 14px 28px; }
+  .nav-links { display: none; }
+  .nav-toggle { display: flex; }
+  .presentation-inner { grid-template-columns: 1fr; gap: 60px; }
+  .phone-showcase { order: -1; }
+  .occasions-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-inner { grid-template-columns: repeat(2, 1fr); }
+  #presentation, #occasions, #why, #testimonials, #download, #stats { padding: 90px 28px; }
+  footer { padding: 40px 28px; }
+  .footer-links { flex-wrap: wrap; gap: 20px; }
+  .download-security { flex-direction: column; gap: 14px; }
+}
+@media (max-width: 600px) {
+  .occasions-grid { grid-template-columns: repeat(2, 1fr); }
+  .why-grid { grid-template-columns: 1fr; }
+  .hero-actions { flex-direction: column; align-items: center; }
+  .phone-frame { width: 200px; height: 408px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-crown">Royale Moments</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+  <div style="font-size:0.58rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--text-muted);opacity:0;animation:fadeUp 0.9s ease 0.6s forwards;">Perfect Moments</div>
+</div>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- PARTICLES -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">Royale <span>Moments</span></a>
+  <ul class="nav-links">
+    <li><a href="#presentation">L'App</a></li>
+    <li><a href="#occasions">Occasions</a></li>
+    <li><a href="#why">Pourquoi nous</a></li>
+    <li><a href="#testimonials">Témoignages</a></li>
+  </ul>
+  <a href="https://github.com/aymane123-houri/mobile_App_Royale/releases/download/v1.0.0/app-debug.apk" class="nav-cta">Télécharger</a>
+  <div class="nav-toggle" id="navToggle">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-lines"></div>
+  <div class="hero-orb orb-1"></div>
+  <div class="hero-orb orb-2"></div>
+  <div class="hero-orb orb-3"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">✦ Application Mobile Premium ✦</div>
+    <h1 class="hero-title">
+      Royale<br><em>Moments</em>
+    </h1>
+    <p class="hero-subtitle">Perfect Moments · Édition de Luxe</p>
+    <p class="hero-desc">
+      Capturez, embellissez et partagez vos instants les plus précieux avec une élégance absolue.
+      Chaque moment mérite d'être immortalisé à la hauteur de son importance.
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/aymane123-houri/mobile_App_Royale/releases/download/v1.0.0/app-debug.apk" class="btn-royal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Télécharger l'Application
+      </a>
+      <a href="#presentation" class="btn-ghost">Découvrir →</a>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <span>Défiler</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- PRESENTATION -->
+<section id="presentation">
+  <div class="presentation-inner">
+    <div class="presentation-text reveal">
+      <span class="section-label">✦ L'Application</span>
+      <h2 class="section-title">Une <em>expérience</em><br>au-delà du souvenir</h2>
+      <div class="gold-divider" style="margin:24px 0;"></div>
+      <p>Royale Moments transcende la simple capture de photos. C'est une application mobile conçue pour les âmes raffinées qui souhaitent célébrer chaque instant de vie avec la dignité qu'il mérite.</p>
+      <p>Des filtres exclusifs aux cadres personnalisés, chaque fonctionnalité a été pensée pour sublimer vos émotions et les transformer en œuvres d'art numériques intemporelles.</p>
+      <ul class="feature-list">
+        <li>
+          <div class="feature-icon">✦</div>
+          <div><strong style="color:var(--gold-pale);display:block;margin-bottom:4px;font-size:0.82rem;letter-spacing:0.05em;">Cartes de Vœux Royales</strong>Créez des cartes personnalisées avec des designs exclusifs pour chaque occasion spéciale de votre vie.</div>
+        </li>
+        <li>
+          <div class="feature-icon">◆</div>
+          <div><strong style="color:var(--gold-pale);display:block;margin-bottom:4px;font-size:0.82rem;letter-spacing:0.05em;">Messages Émotionnels</strong>Rédigez des messages qui touchent le cœur, sublimés par une typographie raffinée et luxueuse.</div>
+        </li>
+        <li>
+          <div class="feature-icon">❋</div>
+          <div><strong style="color:var(--gold-pale);display:block;margin-bottom:4px;font-size:0.82rem;letter-spacing:0.05em;">Partage Instantané</strong>Partagez vos créations avec élégance sur toutes vos plateformes en un seul geste fluide.</div>
+        </li>
+        <li>
+          <div class="feature-icon">✿</div>
+          <div><strong style="color:var(--gold-pale);display:block;margin-bottom:4px;font-size:0.82rem;letter-spacing:0.05em;">Occasions Infinies</strong>Anniversaire, mariage, Eid, naissance… Une bibliothèque d'occasions sans cesse enrichie pour vous.</div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="phone-showcase reveal reveal-delay-3">
+      <div class="phone-ring ring-1"></div>
+      <div class="phone-ring ring-2"></div>
+      <div class="phone-ring ring-3"></div>
+      <div class="phone-frame">
+        <div class="phone-screen-content">
+          <div class="phone-app-icon">👑</div>
+          <div class="phone-app-name">ROYALE<br>MOMENTS</div>
+          <div class="phone-tag">Perfect Moments</div>
+          <div class="phone-preview-cards">
+            <div class="phone-card">
+              <span class="phone-card-emoji">💍</span>
+              <div class="phone-card-text"><strong>Mariage</strong>Créez votre carte royale</div>
+            </div>
+            <div class="phone-card">
+              <span class="phone-card-emoji">🌙</span>
+              <div class="phone-card-text"><strong>Eid Moubarak</strong>Partagez la joie sacrée</div>
+            </div>
+            <div class="phone-card">
+              <span class="phone-card-emoji">🎂</span>
+              <div class="phone-card-text"><strong>Anniversaire</strong>Célébrez avec éclat</div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-glow"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OCCASIONS -->
+<section id="occasions">
+  <div class="occasions-header reveal">
+    <span class="section-label">✦ Vos Occasions</span>
+    <h2 class="section-title">Chaque <em>moment</em><br>mérite sa grandeur</h2>
+    <div class="gold-divider"></div>
+    <p style="color:var(--text-muted);font-size:0.88rem;max-width:480px;margin:0 auto;line-height:1.8;">De l'intime au grandiose, Royale Moments accompagne tous les événements qui jalonnent votre vie.</p>
+  </div>
+
+  <div class="occasions-grid">
+    <div class="occasion-card reveal">
+      <div class="occasion-inner">
+        <span class="occasion-emoji">🎂</span>
+        <span class="occasion-name">Anniversaire</span>
+        <span class="occasion-name-fr">Birthday</span>
+        <p class="occasion-desc">Célébrez chaque année avec une carte digne d'un jour royal.</p>
+        <div class="occasion-glow"></div>
+      </div>
+    </div>
+    <div class="occasion-card reveal reveal-delay-1">
+      <div class="occasion-inner">
+        <span class="occasion-emoji">💍</span>
+        <span class="occasion-name">Mariage</span>
+        <span class="occasion-name-fr">Wedding</span>
+        <p class="occasion-desc">L'union de deux âmes immortalisée dans toute sa splendeur.</p>
+        <div class="occasion-glow"></div>
+      </div>
+    </div>
+    <div class="occasion-card reveal reveal-delay-2">
+      <div class="occasion-inner">
+        <span class="occasion-emoji">👶</span>
+        <span class="occasion-name">Naissance</span>
+        <span class="occasion-name-fr">New Born</span>
+        <p class="occasion-desc">Accueillez le nouveau-né avec un message empreint de douceur.</p>
+        <div class="occasion-glow"></div>
+      </div>
+    </div>
+    <div class="occasion-card reveal reveal-delay-3">
+      <div class="occasion-inner">
+        <span class="occasion-emoji">💖</span>
+        <span class="occasion-name">Amour</span>
+        <span class="occasion-name-fr">Love</span>
+        <p class="occasion-desc">Exprimez ce que les mots seuls ne peuvent traduire.</p>
+        <div class="occasion-glow"></div>
+      </div>
+    </div>
+    <div class="occasion-card reveal">
+      <div class="occasion-inner">
+        <span class="occasion-emoji">🌙</span>
+        <span class="occasion-name">Eid</span>
+        <span class="occasion-name-fr">Eid Moubarak</span>
+        <p class="occasion-desc">Partagez la bénédiction et la joie de la fête sacrée.</p>
+        <div class="occasion-glow"></div>
+      </div>
+    </div>
+    <div class="occasion-card reveal reveal-delay-1">
+      <div class="occasion-inner">
+        <span class="occasion-emoji">🏆</span>
+        <span class="occasion-name">Réussite</span>
+        <span class="occasion-name-fr">Achievement</span>
+        <p class="occasion-desc">Célébrez les victoires grandes et petites avec fierté.</p>
+        <div class="occasion-glow"></div>
+      </div>
+    </div>
+    <div class="occasion-card reveal reveal-delay-2">
+      <div class="occasion-inner">
+        <span class="occasion-emoji">✈️</span>
+        <span class="occasion-name">Voyage</span>
+        <span class="occasion-name-fr">Journey</span>
+        <p class="occasion-desc">Marquez le début d'une nouvelle aventure avec style.</p>
+        <div class="occasion-glow"></div>
+      </div>
+    </div>
+    <div class="occasion-card reveal reveal-delay-3">
+      <div class="occasion-inner">
+        <span class="occasion-emoji">🙏</span>
+        <span class="occasion-name">Gratitude</span>
+        <span class="occasion-name-fr">Thankfulness</span>
+        <p class="occasion-desc">Offrez votre reconnaissance avec une élégance sincère.</p>
+        <div class="occasion-glow"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stats-inner">
+    <div class="stat-item reveal">
+      <div class="stat-number" data-target="50000">0</div>
+      <div class="stat-label">Moments Créés</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-2">
+      <div class="stat-number" data-target="12">0</div>
+      <div class="stat-label">Occasions Couvertes</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-3">
+      <div class="stat-number" data-target="98">0</div>
+      <div class="stat-label">% Satisfaction</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-4">
+      <div class="stat-number" data-target="100">0</div>
+      <div class="stat-label">% Gratuit</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section id="why">
+  <div class="why-inner">
+    <div class="why-header reveal">
+      <span class="section-label">✦ Notre Distinction</span>
+      <h2 class="section-title">Pourquoi choisir<br><em>Royale Moments</em></h2>
+      <div class="gold-divider"></div>
+    </div>
+
+    <div class="why-grid">
+      <div class="why-card reveal">
+        <div class="why-number">01</div>
+        <span class="why-icon">✦</span>
+        <h3 class="why-title">Design Ultra Premium</h3>
+        <p class="why-desc">Chaque modèle est conçu par des artistes passionnés du luxe. Aucun compromis esthétique, aucune concession à la médiocrité.</p>
+      </div>
+      <div class="why-card reveal reveal-delay-2">
+        <div class="why-number">02</div>
+        <span class="why-icon">◆</span>
+        <h3 class="why-title">Personnalisation Totale</h3>
+        <p class="why-desc">Votre message, vos couleurs, vos émotions. L'application s'adapte à votre vision et donne vie à vos envies les plus raffinées.</p>
+      </div>
+      <div class="why-card reveal reveal-delay-3">
+        <div class="why-number">03</div>
+        <span class="why-icon">❋</span>
+        <h3 class="why-title">Simplicité Royale</h3>
+        <p class="why-desc">Une interface intuitive et fluide pensée pour que la création soit un plaisir, jamais une contrainte. L'élégance dans la simplicité.</p>
+      </div>
+      <div class="why-card reveal reveal-delay-1">
+        <div class="why-number">04</div>
+        <span class="why-icon">✿</span>
+        <h3 class="why-title">Occasions Illimitées</h3>
+        <p class="why-desc">Anniversaires, Eid, mariages, naissances… Une bibliothèque riche et constamment mise à jour pour ne jamais manquer le bon moment.</p>
+      </div>
+      <div class="why-card reveal reveal-delay-2">
+        <div class="why-number">05</div>
+        <span class="why-icon">♛</span>
+        <h3 class="why-title">Partage Instantané</h3>
+        <p class="why-desc">WhatsApp, Instagram, SMS… Partagez vos créations directement depuis l'application avec une fluidité absolue et sans friction.</p>
+      </div>
+      <div class="why-card reveal reveal-delay-3">
+        <div class="why-number">06</div>
+        <span class="why-icon">✶</span>
+        <h3 class="why-title">Gratuit & Accessible</h3>
+        <p class="why-desc">Le luxe ne devrait pas être réservé à quelques-uns. Royale Moments est entièrement gratuit pour que tous puissent offrir le meilleur.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="testimonials-header reveal">
+    <span class="section-label">✦ Témoignages</span>
+    <h2 class="section-title">Des moments qui<br><em>touchent le cœur</em></h2>
+    <div class="gold-divider"></div>
+  </div>
+
+  <div class="testimonials-wrapper">
+    <div class="testimonials-track">
+      <!-- Set 1 -->
+      <div class="testimonial-card">
+        <div class="testimonial-occasion">Mariage</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">« J'ai envoyé une carte créée avec Royale Moments à mes proches le jour de mon mariage. Les larmes dans leurs yeux m'ont dit tout ce que les mots ne peuvent exprimer. »</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">💍</div>
+          <div class="author-info">
+            <span class="author-name">Yasmine B.</span>
+            <span class="author-role">Casablanca, Maroc</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-occasion">Eid Moubarak</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">« Enfin une application qui comprend l'âme de nos fêtes. Les cartes d'Eid sont d'une beauté rare. Ma famille adorée a été touchée au plus profond. »</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🌙</div>
+          <div class="author-info">
+            <span class="author-name">Karim A.</span>
+            <span class="author-role">Rabat, Maroc</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-occasion">Naissance</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">« Pour l'arrivée de notre petit prince, Royale Moments nous a offert les mots parfaits. Un souvenir que nous garderons toute notre vie. »</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">👶</div>
+          <div class="author-info">
+            <span class="author-name">Nadia M.</span>
+            <span class="author-role">Marrakech, Maroc</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-occasion">Anniversaire</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">« Ma mère a pleuré de joie en recevant sa carte d'anniversaire. Royale Moments met une âme dans chaque création. Je recommande à tous mes proches. »</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🎂</div>
+          <div class="author-info">
+            <span class="author-name">Hamza R.</span>
+            <span class="author-role">Tanger, Maroc</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-occasion">Réussite</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">« Lorsque mon fils a eu son bac, j'ai voulu lui offrir quelque chose de mémorable. La carte Royale Moments a capturé toute ma fierté. »</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🏆</div>
+          <div class="author-info">
+            <span class="author-name">Fatima Z.</span>
+            <span class="author-role">Fès, Maroc</span>
+          </div>
+        </div>
+      </div>
+      <!-- Set 2 (clone for infinite scroll) -->
+      <div class="testimonial-card">
+        <div class="testimonial-occasion">Mariage</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">« J'ai envoyé une carte créée avec Royale Moments à mes proches le jour de mon mariage. Les larmes dans leurs yeux m'ont dit tout ce que les mots ne peuvent exprimer. »</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">💍</div>
+          <div class="author-info">
+            <span class="author-name">Yasmine B.</span>
+            <span class="author-role">Casablanca, Maroc</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-occasion">Eid Moubarak</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">« Enfin une application qui comprend l'âme de nos fêtes. Les cartes d'Eid sont d'une beauté rare. Ma famille adorée a été touchée au plus profond. »</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🌙</div>
+          <div class="author-info">
+            <span class="author-name">Karim A.</span>
+            <span class="author-role">Rabat, Maroc</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-occasion">Naissance</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">« Pour l'arrivée de notre petit prince, Royale Moments nous a offert les mots parfaits. Un souvenir que nous garderons toute notre vie. »</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">👶</div>
+          <div class="author-info">
+            <span class="author-name">Nadia M.</span>
+            <span class="author-role">Marrakech, Maroc</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-occasion">Anniversaire</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">« Ma mère a pleuré de joie en recevant sa carte d'anniversaire. Royale Moments met une âme dans chaque création. Je recommande à tous mes proches. »</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🎂</div>
+          <div class="author-info">
+            <span class="author-name">Hamza R.</span>
+            <span class="author-role">Tanger, Maroc</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-occasion">Réussite</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">« Lorsque mon fils a eu son bac, j'ai voulu lui offrir quelque chose de mémorable. La carte Royale Moments a capturé toute ma fierté. »</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🏆</div>
+          <div class="author-info">
+            <span class="author-name">Fatima Z.</span>
+            <span class="author-role">Fès, Maroc</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD CTA -->
+<section id="download">
+  <div class="download-bg"></div>
+  <div class="download-inner">
+    <div class="download-badge reveal">✦ Disponible Maintenant ✦</div>
+    <h2 class="download-title reveal">
+      Votre premier<br><em>moment royal</em><br>vous attend
+    </h2>
+    <p class="download-subtitle reveal">
+      Téléchargez Royale Moments gratuitement et commencez à créer des souvenirs qui traverseront le temps. Chaque instant mérite la majesté qui lui est due.
+    </p>
+    <div class="reveal">
+      <a href="https://github.com/aymane123-houri/mobile_App_Royale/releases/download/v1.0.0/app-debug.apk"
+         class="download-btn"
+         download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+          <line x1="12" y1="18" x2="12" y2="18"/>
+        </svg>
+        Télécharger pour Android
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </a>
+      <p class="download-note">Fichier APK · Android 5.0+ · Installation rapide</p>
+    </div>
+    <div class="download-security reveal">
+      <div class="security-item"><span>✦</span> Application Gratuite</div>
+      <div class="security-item"><span>◆</span> Sans Inscription Requise</div>
+      <div class="security-item"><span>❋</span> Aucune Pub Intrusive</div>
+      <div class="security-item"><span>✿</span> Données Privées Protégées</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Royale Moments</div>
+  <div class="footer-tagline">Perfect Moments · L'Art de Célébrer la Vie</div>
+  <ul class="footer-links">
+    <li><a href="#hero">Accueil</a></li>
+    <li><a href="#presentation">L'Application</a></li>
+    <li><a href="#occasions">Occasions</a></li>
+    <li><a href="#why">Pourquoi nous</a></li>
+    <li><a href="https://github.com/aymane123-houri/mobile_App_Royale/releases/download/v1.0.0/app-debug.apk">Télécharger</a></li>
+  </ul>
+  <p class="footer-copy">© 2025 Royale Moments. Tous droits réservés. Fait avec ♛ pour les âmes raffinées.</p>
+</footer>
+
+<!-- =========================================
+   JAVASCRIPT
+========================================= -->
+<script>
+/* ----- LOADER ----- */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hidden');
+  }, 2200);
+});
+
+/* ----- CUSTOM CURSOR ----- */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function animateCursor() {
+  dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+document.querySelectorAll('a, button, .occasion-card, .why-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    ring.style.transform = 'translate(-50%, -50%) scale(1.7)';
+    ring.style.borderColor = 'rgba(201,168,76,0.8)';
+  });
+  el.addEventListener('mouseleave', () => {
+    ring.style.transform = 'translate(-50%, -50%) scale(1)';
+    ring.style.borderColor = 'rgba(201,168,76,0.5)';
+  });
+});
+
+/* ----- PARTICLES ----- */
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function createParticle() {
+  return {
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: Math.random() * 1.2 + 0.2,
+    vx: (Math.random() - 0.5) * 0.18,
+    vy: -(Math.random() * 0.25 + 0.05),
+    alpha: Math.random() * 0.5 + 0.1,
+    color: Math.random() > 0.5 ? '201,168,76' : '212,175,122'
+  };
+}
+
+for (let i = 0; i < 110; i++) particles.push(createParticle());
+
+function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${p.color},${p.alpha})`;
+    ctx.fill();
+    p.x += p.vx; p.y += p.vy;
+    if (p.y < -5) { p.y = H + 5; p.x = Math.random() * W; }
+    if (p.x < -5) p.x = W + 5;
+    if (p.x > W + 5) p.x = -5;
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+/* ----- NAV SCROLL ----- */
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+/* ----- SCROLL REVEAL ----- */
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); }
+  });
+}, { threshold: 0.12 });
+reveals.forEach(r => observer.observe(r));
+
+/* ----- COUNTER ANIMATION ----- */
+function animateCounter(el) {
+  const target = parseInt(el.dataset.target);
+  const suffix = el.dataset.suffix || (target >= 50000 ? '+' : target === 98 ? '%' : target === 100 ? '%' : '');
+  let current = 0;
+  const increment = target / 65;
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) { current = target; clearInterval(timer); }
+    el.textContent = Math.floor(current).toLocaleString() + suffix;
+  }, 22);
+}
+const statObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const el = e.target.querySelector('.stat-number');
+      if (el && !el.dataset.animated) {
+        el.dataset.animated = '1';
+        animateCounter(el);
+      }
+    }
+  });
+}, { threshold: 0.4 });
+document.querySelectorAll('.stat-item').forEach(s => statObserver.observe(s));
+
+/* ----- PARALLAX HERO ORBS ----- */
+document.addEventListener('mousemove', e => {
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  const dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
+  document.querySelectorAll('.hero-orb').forEach((orb, i) => {
+    const factor = (i + 1) * 12;
+    orb.style.transform = `translate(${dx * factor}px, ${dy * factor}px)`;
+  });
+});
+
+/* ----- OCCASION CARD TILT ----- */
+document.querySelectorAll('.occasion-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    card.style.transform = `translateY(-4px) rotateX(${-y / rect.height * 8}deg) rotateY(${x / rect.width * 8}deg)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+  });
+});
+
+/* ----- SMOOTH ANCHOR SCROLL ----- */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+
+/* ----- STAT SUFFIX MAPPING ----- */
+document.querySelectorAll('.stat-number').forEach(el => {
+  const t = parseInt(el.dataset.target);
+  if (t === 50000) el.dataset.suffix = '+';
+  else if (t === 98 || t === 100) el.dataset.suffix = '%';
+  else el.dataset.suffix = '';
+});
+</script>
+</body>
+</html>

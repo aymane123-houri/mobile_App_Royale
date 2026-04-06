@@ -8,8 +8,20 @@ environment:
   sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
+  workmanager: ^0.6.0
   flutter:
     sdk: flutter
+
+  firebase_core: ^3.6.0
+  firebase_storage: ^12.3.0
+  
+  flutter_secure_storage: ^9.2.2
+  camera: ^0.11.0+1          # dernière version stable en 2026
+  permission_handler: ^11.3.0
+  flutter_background: ^1.2.0
+  # Firebase
+
+
 
   cupertino_icons: ^1.0.8
 

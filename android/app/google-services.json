@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "63605957686",
+    "project_id": "royale-moments",
+    "storage_bucket": "royale-moments.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63605957686:android:689436a8cb480d0a99a497",
+        "android_client_info": {
+          "package_name": "com.example.eid_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6Ui1650azOyLDklcOa-Q81GUcDtU6-V0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
